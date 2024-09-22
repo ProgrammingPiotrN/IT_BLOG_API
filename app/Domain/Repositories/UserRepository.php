@@ -16,4 +16,9 @@ class UserRepository implements UserRepositoryInterface
 
         return $user;
     }
+
+    public function getAll(): array
+    {
+        return User::all()->toArray();
+    }
 }

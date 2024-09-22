@@ -2,63 +2,56 @@
 
 namespace App\Interfaces\Http\Controllers;
 
-use App\Application\Commands\CreateUserCommand;
 use App\Application\DTOs\UserDTO;
-use App\Application\Handlers\CreateUserHandler;
+use App\Application\UseCases\CreateUserUseCase;
+use App\Application\UseCases\GetUserListUseCase;
+use App\Domain\Exceptions\UserCreationException;
+use App\Http\Resources\Interface\Http\Resources\UserResource;
+
+use App\Infrastructure\Notifications\UserCreatedNotification;
 use App\Interfaces\Http\Requests\CreateUserRequest;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Notification;
 
-class UserController
+class UserController extends Controller
 {
-    protected CreateUserHandler $handler;
+    protected CreateUserUseCase $createUserUseCase;
+    protected GetUserListUseCase $getUserListUseCase;
 
-    public function __construct(CreateUserHandler $handler) {
-        $this->handler = $handler;
-    }
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct(CreateUserUseCase $createUserUseCase, GetUserListUseCase $getUserListUseCase)
     {
-        //
+        $this->createUserUseCase = $createUserUseCase;
+        $this->getUserListUseCase = $getUserListUseCase;
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(CreateUserRequest $request): JsonResponse
     {
-        $userDTO = UserDTO::fromArray($request->validated());
-        $command = new CreateUserCommand($userDTO);
-        $this->handler->handle($command);
+        try {
+            $userDTO = UserDTO::fromArray($request->validated());
+            $user = $this->createUserUseCase->execute($userDTO);
 
-        return response()->json([
-            'message' => 'User created successfully!',
-        ], 201);
+            // Wysyłanie powiadomienia
+            Notification::send($user, new UserCreatedNotification($user->name));
+
+            return response()->json([
+                'message' => 'User created successfully!',
+            ], 201);
+        } catch (UserCreationException $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+            ], 422);
+        } catch (Exception $e) {
+            return response()->json([
+                'error' => 'An unexpected error occurred',
+            ], 500);
+        }
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function index(): JsonResponse
     {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $users = $this->getUserListUseCase->execute();
+        return UserResource::collection(collect($users))->response();
     }
 }
