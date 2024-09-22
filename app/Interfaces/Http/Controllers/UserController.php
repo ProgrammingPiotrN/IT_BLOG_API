@@ -33,7 +33,7 @@ class UserController extends Controller
             $user = $this->createUserUseCase->execute($userDTO);
 
             // Wysyłanie powiadomienia
-            Notification::send($user, new UserCreatedNotification($user->name));
+            Notification::send($user, new UserCreatedNotification($user->userName, $user->userEmail));
 
             return response()->json([
                 'message' => 'User created successfully!',

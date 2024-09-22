@@ -12,6 +12,12 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
@@ -23,20 +29,20 @@ class User extends Authenticatable
 
     private function __construct() {}
 
-    public static function createFromString(string $user):self
+    public static function createFromString(string $user): self
     {
         $data = json_decode($user, true);
         return self::createFromArray($data);
     }
 
-    public static function createFromArray(array $data):self
+    public static function createFromArray(array $data): self
     {
         $user = new self();
         $user->name = $data['name'];
         $user->email = $data['email'];
-        $user->password = bcrypt($data['password']);
-        return $user;
+        $user->password = $data['password'];
 
+        return $user;
     }
 
     public static function createEmpty(): self

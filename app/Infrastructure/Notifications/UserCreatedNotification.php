@@ -12,10 +12,13 @@ class UserCreatedNotification extends Notification implements ShouldQueue
     use Queueable;
 
     protected string $userName;
+    protected string $userEmail;
 
-    public function __construct(string $userName)
+
+    public function __construct(string $userName, string $userEmail)
     {
         $this->userName = $userName;
+        $this->userEmail = $userEmail;
     }
 
     public function via($notifiable)
