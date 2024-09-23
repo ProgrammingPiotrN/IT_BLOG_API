@@ -2,20 +2,25 @@
 
 namespace App\Application\UseCases;
 
-use App\Application\DTOs\UserDTO;
-use App\Application\Services\UserService;
+use App\Application\Commands\CreateUserCommand;
+use App\Application\DTOs\CreateUserDTO;
+use App\Application\Handlers\CreateUserHandler;
 
 class CreateUserUseCase
 {
-    protected UserService $userService;
+    /**
+     * Create a new class instance.
+     */
+    private CreateUserHandler $createUserHandler;
 
-    public function __construct(UserService $userService)
+    public function __construct(CreateUserHandler $createUserHandler)
     {
-        $this->userService = $userService;
+        $this->createUserHandler = $createUserHandler;
     }
 
-    public function execute(UserDTO $userDTO)
+    public function handle(CreateUserDTO $userDTO): void
     {
-        return $this->userService->createUser($userDTO);
+        $command = new CreateUserCommand($userDTO->name, $userDTO->email, $userDTO->password);
+        $this->createUserHandler->handle($command);
     }
 }

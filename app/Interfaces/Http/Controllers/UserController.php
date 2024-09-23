@@ -2,56 +2,47 @@
 
 namespace App\Interfaces\Http\Controllers;
 
-use App\Application\DTOs\UserDTO;
+use App\Application\Commands\GetUsersCommand;
+use App\Application\DTOs\CreateUserDTO;
 use App\Application\UseCases\CreateUserUseCase;
-use App\Application\UseCases\GetUserListUseCase;
-use App\Domain\Exceptions\UserCreationException;
+use App\Application\UseCases\GetUsersUseCase;
+use App\Domain\Models\User;
+use App\Interfaces\Http\Requests\GetUsersRequest;
 use App\Http\Resources\Interface\Http\Resources\UserResource;
-
-use App\Infrastructure\Notifications\UserCreatedNotification;
 use App\Interfaces\Http\Requests\CreateUserRequest;
-use Exception;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Notification;
+
 
 class UserController extends Controller
 {
-    protected CreateUserUseCase $createUserUseCase;
-    protected GetUserListUseCase $getUserListUseCase;
+    private CreateUserUseCase $createUserUseCase;
+    private GetUsersUseCase $getUsersUseCase;
 
-    public function __construct(CreateUserUseCase $createUserUseCase, GetUserListUseCase $getUserListUseCase)
+    public function __construct(CreateUserUseCase $createUserUseCase, GetUsersUseCase $getUsersUseCase)
     {
         $this->createUserUseCase = $createUserUseCase;
-        $this->getUserListUseCase = $getUserListUseCase;
     }
 
-    public function store(CreateUserRequest $request): JsonResponse
+    public function store(CreateUserRequest $request)
     {
-        try {
-            $userDTO = UserDTO::fromArray($request->validated());
-            $user = $this->createUserUseCase->execute($userDTO);
-
-            // Wysyłanie powiadomienia
-            Notification::send($user, new UserCreatedNotification($user->userName, $user->userEmail));
-
-            return response()->json([
-                'message' => 'User created successfully!',
-            ], 201);
-        } catch (UserCreationException $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-            ], 422);
-        } catch (Exception $e) {
-            return response()->json([
-                'error' => 'An unexpected error occurred',
-            ], 500);
-        }
+        $userDTO = new CreateUserDTO($request->name, $request->email, $request->password);
+        $this->createUserUseCase->handle($userDTO);
+        return response()->json(['message' => 'Użytkownik został utworzony!'], 201);
     }
 
-    public function index(): JsonResponse
+    public function show($id)
     {
-        $users = $this->getUserListUseCase->execute();
-        return UserResource::collection(collect($users))->response();
+        $user = User::findOrFail($id);
+        return new UserResource($user);
+    }
+
+    public function index(GetUsersRequest $request)
+    {
+        $command = new GetUsersCommand(
+            page: $request->query('page', 1),
+            limit: $request->query('limit', 10)
+        );
+        $users = $this->getUsersUseCase->execute($command);
+
+        return UserResource::collection($users);
     }
 }

@@ -2,23 +2,24 @@
 
 namespace App\Infrastructure\Notifications;
 
+
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Notifications\Messages\MailMessage;
 
 class UserCreatedNotification extends Notification implements ShouldQueue
 {
+    /**
+     * Create a new class instance.
+     */
     use Queueable;
 
-    protected string $userName;
-    protected string $userEmail;
+    private $user;
 
-
-    public function __construct(string $userName, string $userEmail)
+    public function __construct($user)
     {
-        $this->userName = $userName;
-        $this->userEmail = $userEmail;
+        $this->user = $user;
     }
 
     public function via($notifiable)
@@ -29,9 +30,10 @@ class UserCreatedNotification extends Notification implements ShouldQueue
     public function toMail($notifiable)
     {
         return (new MailMessage)
-            ->greeting('Hello!')
-            ->line("A new user, {$this->userName}, has been created.")
-            ->action('View Users', url('/users'))
-            ->line('Thank you for using our application!');
+            ->subject('Użytkownik utworzony')
+            ->greeting('Witaj!')
+            ->line("Użytkownik {$this->user->name} został pomyślnie utworzony.")
+            ->action('Zobacz użytkownika', url('/users/' . $this->user->id))
+            ->line('Dziękujemy za korzystanie z naszej aplikacji!');
     }
 }

@@ -2,7 +2,10 @@
 
 namespace App\Application\DTOs;
 
-class UserDTO
+use App\Domain\ValueObjects\Email;
+use App\Domain\ValueObjects\Password;
+
+class CreateUserDTO
 {
     /**
      * Create a new class instance.
@@ -18,12 +21,14 @@ class UserDTO
         $this->password = $password;
     }
 
-    public static function fromArray(array $data): self
+    public function getName(): string
     {
-        return new self(
-            $data['name'],
-            $data['email'],
-            $data['password']
-        );
+        return $this->name;
     }
+
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+
 }

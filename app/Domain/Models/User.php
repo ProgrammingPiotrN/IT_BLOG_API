@@ -3,70 +3,56 @@
 namespace App\Domain\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Domain\Exceptions\UserCreationException;
+use App\Domain\Exceptions\UserNotFoundException;
+use App\Domain\ValueObjects\Email;
+use App\Domain\ValueObjects\Password;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\DB;
 use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
+    private string $name;
+    private Email $email;
+    private Password $password;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    public string $name;
-    public string $email;
-    public string $password;
-
-    private function __construct() {}
-
-    public static function createFromString(string $user): self
+    public function __construct(string $name, Email $email, Password $password)
     {
-        $data = json_decode($user, true);
-        return self::createFromArray($data);
+        $this->name = $name;
+        $this->email = $email;
+        $this->password = $password;
+    }
+
+    public function getName(): string {
+        return $this->name;
+    }
+
+    public function getEmail(): Email {
+        return $this->email;
+    }
+
+    public function getPassword(): Password {
+        return $this->password;
     }
 
     public static function createFromArray(array $data): self
     {
-        $user = new self();
-        $user->name = $data['name'];
-        $user->email = $data['email'];
-        $user->password = $data['password'];
-
-        return $user;
+        return new self($data['name'], new Email($data['email']), new Password($data['password']));
     }
 
     public static function createEmpty(): self
     {
-        return new self();
+        return new self('', new Email(''), new Password(''));
     }
 
 
+    protected $hidden = ['password', 'remember_token'];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [

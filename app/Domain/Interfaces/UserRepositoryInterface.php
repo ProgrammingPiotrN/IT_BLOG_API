@@ -6,7 +6,12 @@ use App\Domain\Models\User;
 
 interface UserRepositoryInterface
 {
-    public function save(User $user): User;
-    public function getAll(): array;
+    /**
+     * Create a new class instance.
+     */
+    public function save(User $user): void;
 
+    public function findAll(int $page = 1, int $limit = 10): array;
+
+    public function findByEmail(string $email): ?User;
 }
