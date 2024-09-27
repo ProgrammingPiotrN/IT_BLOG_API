@@ -11,8 +11,9 @@ class Email
 
     public function __construct(string $email)
     {
+        // Walidacja emaila
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            throw new \InvalidArgumentException("Invalid email address.");
+            throw new \InvalidArgumentException("Invalid email address");
         }
         $this->email = $email;
     }

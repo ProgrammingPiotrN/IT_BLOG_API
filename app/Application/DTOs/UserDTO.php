@@ -2,13 +2,13 @@
 
 namespace App\Application\DTOs;
 
-class ProfileUserDTO
+class UserDTO
 {
     /**
      * Create a new class instance.
      */
-    public string $name;
-    public string $email;
+    private string $name;
+    private string $email;
 
     public function __construct(string $name, string $email)
     {

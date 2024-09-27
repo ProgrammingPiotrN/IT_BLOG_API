@@ -2,11 +2,12 @@
 
 namespace App\Application\Commands;
 
-class GetUsersCommand
+class ResetTokenCommand
 {
     /**
      * Create a new class instance.
      */
+
     public string $email;
     public function __construct(string $email)
     {

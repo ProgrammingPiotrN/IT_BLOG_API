@@ -6,25 +6,22 @@ use App\Application\Commands\GetUsersCommand;
 use App\Application\DTOs\ProfileUserDTO;
 use App\Application\Services\UserService;
 use App\Domain\Interfaces\UserRepositoryInterface;
+use App\Domain\Models\User;
 
 class GetUsersHandler
 {
     /**
      * Create a new class instance.
      */
-    public function __construct(
-        private UserRepositoryInterface $userRepository
-    ) {}
 
-    public function handle(GetUsersCommand $command): array
+     private UserRepositoryInterface $userRepository;
+    public function __construct(UserRepositoryInterface $userRepository)
     {
-        $users = $this->userRepository->findAll($command->page, $command->limit);
+        $this->userRepository = $userRepository;
+    }
 
-        return array_map(function($user) {
-            return new ProfileUserDTO(
-                name: $user->getName(),
-                email: $user->getEmail()->getValue()
-            );
-        }, $users);
+    public function handle(GetUsersCommand $getUsersCommand): ?User
+    {
+        return $this->userRepository->findByEmail($getUsersCommand->email);
     }
 }

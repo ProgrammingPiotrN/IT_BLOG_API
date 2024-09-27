@@ -4,7 +4,7 @@ namespace App\Interfaces\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class GetUsersRequest extends FormRequest
+class LogoutUsersRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

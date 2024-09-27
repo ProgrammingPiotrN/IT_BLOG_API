@@ -12,7 +12,7 @@ class Password
     public function __construct(string $password)
     {
         if (strlen($password) < 6) {
-            throw new \InvalidArgumentException("Password must be at least 6 characters long.");
+            throw new \InvalidArgumentException("Password must be at least 6 characters long");
         }
         $this->password = $password;
     }

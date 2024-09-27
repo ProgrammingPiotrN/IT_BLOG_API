@@ -17,7 +17,7 @@ class UserRepository implements UserRepositoryInterface
 
     public function __construct(PDO $dbConnection)
     {
-        $this->db = $dbConnection; // Zainicjalizuj połączenie z bazą danych
+        $this->db = $dbConnection;
     }
 
     public function save(User $user): void
@@ -26,34 +26,20 @@ class UserRepository implements UserRepositoryInterface
         $stmt->execute([
             $user->getName(),
             $user->getEmail()->getValue(),
-            password_hash($user->getPassword()->getValue(), PASSWORD_BCRYPT)
+            password_hash($user->getPassword()->getValue(), PASSWORD_DEFAULT),
         ]);
     }
 
     public function findByEmail(string $email): ?User
     {
-        $stmt = $this->db->prepare("SELECT name, email, password FROM users WHERE email = ?");
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE email = ?");
         $stmt->execute([$email]);
-        $userData = $stmt->fetch();
+        $data = $stmt->fetch();
 
-        if (!$userData) {
+        if (!$data) {
             return null;
         }
 
-        return new User($userData['name'], new Email($userData['email']), new Password($userData['password']));
-    }
-
-    public function findAll(int $page = 1, int $limit = 10): array
-    {
-        $offset = ($page - 1) * $limit;
-        $stmt = $this->db->prepare("SELECT name, email FROM users LIMIT :limit OFFSET :offset");
-        $stmt->bindValue(':limit', $limit, \PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, \PDO::PARAM_INT);
-        $stmt->execute();
-        $results = $stmt->fetchAll();
-
-        return array_map(function($userData) {
-            return new User($userData['name'], new Email($userData['email']), new Password(''));
-        }, $results);
+        return new User($data['name'], $data['email'], new Password($data['password']));
     }
 }

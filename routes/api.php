@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // })->middleware('auth:api');
 
-Route::get('/users', [UserController::class, 'index']);
 Route::post('/users', [UserController::class, 'store']);
-Route::get('/users/{id}', [UserController::class, 'show']);
-
+Route::get('/users/profile', [UserController::class, 'show']);
+Route::post('/users/logout', [UserController::class, 'logout']);
+Route::post('/users/reset-token', [UserController::class, 'resetToken']);

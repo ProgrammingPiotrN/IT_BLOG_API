@@ -4,18 +4,22 @@ namespace App\Application\UseCases;
 
 use App\Application\Commands\GetUsersCommand;
 use App\Application\Handlers\GetUsersHandler;
+use App\Domain\Models\User;
 
 class GetUsersUseCase
 {
     /**
      * Create a new class instance.
      */
-    public function __construct(
-        private GetUsersHandler $getUsersHandler
-    ) {}
+    private GetUsersHandler $handler;
 
-    public function execute(GetUsersCommand $command): array
+    public function __construct(GetUsersHandler $handler)
     {
-        return $this->getUsersHandler->handle($command);
+        $this->handler = $handler;
+    }
+
+    public function execute(GetUsersCommand $command): ?User
+    {
+        return $this->handler->handle($command);
     }
 }

@@ -2,12 +2,14 @@
 
 namespace App\Application\Services;
 
-use App\Application\DTOs\CreateUserDTO;
+use App\Application\DTOs\UserDTO;
 use App\Domain\Interfaces\UserRepositoryInterface;
+use App\Domain\Interfaces\UserServiceInterface;
 use App\Domain\Models\User;
-use Illuminate\Support\Facades\Hash;
+use App\Domain\ValueObjects\Email;
+use App\Domain\ValueObjects\Password;
 
-class UserService
+class UserService implements UserServiceInterface
 {
     /**
      * Create a new class instance.
@@ -19,21 +21,16 @@ class UserService
         $this->userRepository = $userRepository;
     }
 
-    public function createUser(CreateUserDTO $userDTO): User
+    public function registerUser(UserDTO $userDTO, Password $password): void
     {
-        $hashed = Hash::make($userDTO->password);
-
-        $user = User::createFromArray([
-            'name' => $userDTO->name,
-            'email' => $userDTO->email,
-            'password' => $hashed,
-        ]);
+        // Logika rejestracji użytkownika
+        $email = new Email($userDTO->getEmail());
+        $user = new User($userDTO->getName(), $email, $password);
         $this->userRepository->save($user);
-        return $user;
     }
 
-    public function getAllUsers(int $page, int $limit): array
+    public function getUserByEmail(string $email): ?User
     {
-        return $this->userRepository->findAll($page, $limit);
+        return $this->userRepository->findByEmail($email);
     }
 }
