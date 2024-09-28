@@ -3,10 +3,10 @@
 namespace App\Application\Handlers;
 
 use App\Application\Commands\GetUsersCommand;
-use App\Application\DTOs\ProfileUserDTO;
 use App\Application\Services\UserService;
-use App\Domain\Interfaces\UserRepositoryInterface;
+use App\Domain\Interfaces\UserServiceInterface;
 use App\Domain\Models\User;
+use InvalidArgumentException;
 
 class GetUsersHandler
 {
@@ -14,14 +14,27 @@ class GetUsersHandler
      * Create a new class instance.
      */
 
-     private UserRepositoryInterface $userRepository;
-    public function __construct(UserRepositoryInterface $userRepository)
+    private UserServiceInterface $userService;
+
+    public function __construct(UserServiceInterface $userService)
     {
-        $this->userRepository = $userRepository;
+        $this->userService = $userService;
     }
 
     public function handle(GetUsersCommand $getUsersCommand): ?User
     {
-        return $this->userRepository->findByEmail($getUsersCommand->email);
+        // Email validation
+        if (!$this->isValidEmail($getUsersCommand->email)) {
+            throw new InvalidArgumentException('Invalid email address.');
+        }
+
+        // Retrieve user using UserService
+        return $this->userService->getUserByEmail($getUsersCommand->email);
+    }
+
+    private function isValidEmail(string $email): bool
+    {
+        // Simple email validation
+        return filter_var($email, FILTER_VALIDATE_EMAIL) !== false;
     }
 }

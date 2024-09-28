@@ -4,6 +4,7 @@ namespace App\Application\UseCases;
 
 use App\Application\Commands\CreateUserCommand;
 use App\Application\Handlers\CreateUserHandler;
+use App\Domain\Models\User;
 
 class CreateUserUseCase
 {
@@ -19,6 +20,6 @@ class CreateUserUseCase
 
     public function execute(CreateUserCommand $command): void
     {
-        $this->createUserHandler->handle($command);
+        return $this->createUserHandler->handle($command);
     }
 }

@@ -3,7 +3,7 @@
 namespace App\Application\Handlers;
 
 use App\Application\Commands\CreateUserCommand;
-use App\Domain\Interfaces\UserRepositoryInterface;
+use App\Domain\Interfaces\UserServiceInterface;
 use App\Domain\Models\User;
 use App\Domain\ValueObjects\Email;
 
@@ -12,18 +12,21 @@ class CreateUserHandler
     /**
      * Create a new class instance.
      */
-    private UserRepositoryInterface $userRepository;
+    private UserServiceInterface $userService;
 
-    public function __construct(UserRepositoryInterface $userRepository)
+    public function __construct(UserServiceInterface $userService)
     {
-        $this->userRepository = $userRepository;
+        $this->userService = $userService;
     }
 
     public function handle(CreateUserCommand $createUserCommand): void
-    {
-        $userDTO = $createUserCommand->userDTO;
-        $email = new Email($userDTO->getEmail());
-        $user = new User($userDTO->getName(), $email, $createUserCommand->password);
-        $this->userRepository->save($user);
+{
+    // Prosta walidacja
+    if (empty($createUserCommand->userDTO->getName()) || empty($createUserCommand->userDTO->getEmail())) {
+        throw new \InvalidArgumentException('Name and email are required.');
     }
+
+    // Użycie UserService do rejestracji użytkownika
+    $this->userService->registerUser($createUserCommand->userDTO, $createUserCommand->password);
+}
 }

@@ -18,4 +18,14 @@ class CreateUserCommand
         $this->userDTO = $userDTO;
         $this->password = $password;
     }
+
+    public function getUserDTO(): UserDTO
+    {
+        return $this->userDTO;
+    }
+
+    public function getPassword(): Password
+    {
+        return $this->password;
+    }
 }

@@ -11,5 +11,13 @@ interface UserRepositoryInterface
      */
     public function save(User $user): void;
 
+    public function findById(int $id): ?User;
+
     public function findByEmail(string $email): ?User;
+
+    public function delete(int $id): void;
+
+    // Pobierz listę użytkowników z paginacją
+    public function findAll(int $page = 1, int $limit = 10): array;
+
 }

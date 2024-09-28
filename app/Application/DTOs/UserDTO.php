@@ -2,15 +2,17 @@
 
 namespace App\Application\DTOs;
 
+use App\Domain\ValueObjects\Email;
+
 class UserDTO
 {
     /**
      * Create a new class instance.
      */
     private string $name;
-    private string $email;
+    private Email $email;
 
-    public function __construct(string $name, string $email)
+    public function __construct(string $name, Email $email)
     {
         $this->name = $name;
         $this->email = $email;
@@ -21,7 +23,7 @@ class UserDTO
         return $this->name;
     }
 
-    public function getEmail(): string
+    public function getEmail(): Email
     {
         return $this->email;
     }

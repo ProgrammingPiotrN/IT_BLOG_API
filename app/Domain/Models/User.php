@@ -3,6 +3,9 @@
 namespace App\Domain\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Application\DTOs\UserDTO;
+use App\Domain\Exceptions\CannotCreateUserException;
 use App\Domain\Exceptions\UserCreationException;
 use App\Domain\Exceptions\UserNotFoundException;
 use App\Domain\ValueObjects\Email;

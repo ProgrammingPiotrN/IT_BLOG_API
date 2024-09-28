@@ -8,9 +8,15 @@ class ResetTokenCommand
      * Create a new class instance.
      */
 
-    public string $email;
-    public function __construct(string $email)
-    {
-        $this->email = $email;
-    }
+     private int $userId;
+
+     public function __construct(int $userId)
+     {
+         $this->userId = $userId;
+     }
+
+     public function getUserId(): int
+     {
+         return $this->userId;
+     }
 }
