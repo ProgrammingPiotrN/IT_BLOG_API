@@ -8,36 +8,100 @@ use App\Domain\Interfaces\UserRepositoryInterface;
 use App\Domain\Models\User;
 use App\Domain\ValueObjects\Email;
 use App\Domain\ValueObjects\Password;
+use Laravel\Passport\TokenRepository;
 use PHPUnit\Framework\TestCase;
 
 class UserServiceTest extends TestCase
 {
-    private $userRepositoryMock;
-    private $userService;
+    private UserRepositoryInterface $userRepository;
+    private TokenRepository $tokenRepository;
+    private UserService $userService;
 
     protected function setUp(): void
     {
-        // Mockowanie UserRepositoryInterface
-        $this->userRepositoryMock = $this->createMock(UserRepositoryInterface::class);
-
-        // Inicjalizacja UserService z mockiem repozytorium
-        $this->userService = new UserService($this->userRepositoryMock);
+        $this->userRepository = $this->createMock(UserRepositoryInterface::class);
+        $this->tokenRepository = $this->createMock(TokenRepository::class);
+        $this->userService = new UserService($this->userRepository, $this->tokenRepository);
     }
 
-    public function testRegisterUser(): void
+    public function testFindUserByIdReturnsUser()
     {
-        // Ustawienie danych testowych
-        $userDTO = new UserDTO('John Doe', 'john@example.com');
-        $password = new Password('secret123');
-        $email = new Email($userDTO->getEmail());
-        $user = new User('John Doe', $email, $password);
+        $user = new User(/* inicjalizacja użytkownika, np. 'name' => 'Test User' */);
+        $this->userRepository->expects($this->once())
+            ->method('findById')
+            ->with(1) // Upewnij się, że przekazujesz odpowiedni ID
+            ->willReturn($user);
 
-        // Upewniamy się, że metoda `save` repozytorium zostanie wywołana raz z odpowiednim użytkownikiem
-        $this->userRepositoryMock->expects($this->once())
+        $result = $this->userService->findUserById(1);
+
+        $this->assertSame($user, $result);
+    }
+
+    public function testLogoutRevokesUserTokens()
+    {
+        $tokenMock = $this->createMock(\Laravel\Passport\Token::class);
+        $tokenMock->id = 123;
+
+        $user = new User(/* inicjalizacja użytkownika */);
+        $user->tokens = [$tokenMock];
+
+        $this->tokenRepository->expects($this->once())
+            ->method('revokeAccessToken')
+            ->with($tokenMock->id);
+
+        $this->userService->logout($user);
+    }
+
+    public function testRegisterUserSavesUser()
+    {
+        $userDTO = new UserDTO('Test User', 'test@example.com');
+        $password = new Password('securepassword');
+
+        // Upewnij się, że metoda createFromArray jest dostępna w klasie User
+        $user = User::createFromArray([
+            'name' => 'Test User',
+            'email' => 'test@example.com',
+            'password' => $password->getValue(),
+        ]);
+
+        $this->userRepository->expects($this->once())
             ->method('save')
-            ->with($this->equalTo($user));
+            ->with($user);
 
-        // Wykonanie metody registerUser
         $this->userService->registerUser($userDTO, $password);
+    }
+
+    public function testGetUserByEmailReturnsUser()
+    {
+        $user = new User(/* inicjalizacja użytkownika */);
+        $this->userRepository->expects($this->once())
+            ->method('findByEmail')
+            ->with('test@example.com')
+            ->willReturn($user);
+
+        $result = $this->userService->getUserByEmail('test@example.com');
+
+        $this->assertSame($user, $result);
+    }
+
+    public function testCreateDefaultUser()
+    {
+        $userMock = $this->createMock(User::class);
+
+        // Jeśli createEmpty jest statyczną metodą, musisz wywołać ją w odpowiedni sposób
+        $user = User::createEmpty();
+
+        $this->assertInstanceOf(User::class, $user);
+    }
+
+    public function testUpdateUserSavesUser()
+    {
+        $user = new User(/* inicjalizacja użytkownika */);
+
+        $this->userRepository->expects($this->once())
+            ->method('save')
+            ->with($user);
+
+        $this->userService->updateUser($user);
     }
 }
