@@ -14,6 +14,7 @@ use App\Domain\ValueObjects\Post\Comment;
 use App\Domain\ValueObjects\Post\Content;
 use App\Domain\ValueObjects\Post\Title;
 use DateTime;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Auth;
 
 class PostService implements PostServiceInterface
@@ -61,5 +62,10 @@ class PostService implements PostServiceInterface
     public function delete(Post $post): void
     {
         $this->postRepositoryInterface->delete($post);
+    }
+
+    public function getPaginatedPosts(int $page, int $limit): LengthAwarePaginator
+    {
+        return $this->postRepositoryInterface->paginate($page, $limit);
     }
 }

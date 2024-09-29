@@ -5,9 +5,11 @@ namespace App\Interfaces\Http\Controllers\Post;
 use App\Application\Commands\Post\CommentOnPostCommand;
 use App\Application\Commands\Post\CreatePostCommand;
 use App\Application\Commands\Post\DeletePostCommand;
+use App\Application\Commands\Post\GetPostsCommand;
 use App\Application\Commands\Post\LikePostCommand;
 use App\Application\DTOs\Post\CommentDTO;
 use App\Application\DTOs\Post\PostDTO;
+use App\Application\Handlers\Post\GetPostsHandler;
 use App\Application\UseCases\Post\CommentOnPostUseCase;
 use App\Application\UseCases\Post\CreatePostUseCase;
 use App\Application\UseCases\Post\DeletePostUseCase;
@@ -19,12 +21,14 @@ use App\Interfaces\Http\Controllers\Controller;
 use App\Interfaces\Http\Requests\Post\CommentOnPostRequest;
 use App\Interfaces\Http\Requests\Post\CreatePostRequest;
 use App\Interfaces\Http\Requests\Post\DeletePostRequest;
+use App\Interfaces\Http\Requests\Post\GetPostsRequest;
 use App\Interfaces\Http\Requests\Post\LikePostRequest;
 use App\Interfaces\Http\Resources\Post\PostResource;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Illuminate\Routing\Controller as BaseController;
 
 
 
@@ -36,7 +40,10 @@ class PostController extends BaseController
         private CommentOnPostUseCase $commentOnPostUseCase,
         private DeletePostUseCase $deletePostUseCase,
 
-        private PostRepositoryInterface $postRepositoryInterface
+        private PostRepositoryInterface $postRepositoryInterface,
+
+        private GetPostsHandler $getPostsHandler
+
     ) {}
 
     public function create(CreatePostRequest $request)
@@ -129,14 +136,15 @@ class PostController extends BaseController
         return response()->json(['message' => 'Post deleted successfully']);
     }
 
-    public function show(int $postId)
+    public function show(GetPostsRequest $request): JsonResponse
     {
-        $post = $this->postRepositoryInterface->findById($postId);
+        $page = $request->query('page', 1);
+        $limit = $request->query('limit', 10);
 
-        if (!$post) {
-            return response()->json(['message' => 'Post not found'], 404);
-        }
+        $command = new GetPostsCommand($page, $limit);
+        $paginatedPosts = $this->getPostsHandler->handle($command);
 
-        return new PostResource($post);
+        // Zwracanie paginowanych postów jako zasobów
+        return response()->json(PostResource::collection($paginatedPosts), 200);
     }
 }

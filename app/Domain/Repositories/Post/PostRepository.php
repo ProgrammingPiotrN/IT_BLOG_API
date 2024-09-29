@@ -8,6 +8,7 @@ use App\Domain\Models\Post;
 use App\Domain\ValueObjects\Post\Content;
 use App\Domain\ValueObjects\Post\Title;
 use DateTime;
+use Illuminate\Pagination\LengthAwarePaginator;
 use PDO;
 
 class PostRepository implements PostRepositoryInterface
@@ -84,5 +85,10 @@ class PostRepository implements PostRepositoryInterface
             WHERE id = :id
         ");
         $stmt->execute(['id' => $post->getId()]);
+    }
+
+    public function paginate(int $page, int $limit): LengthAwarePaginator
+    {
+        return Post::paginate($limit, ['*'], 'page', $page);
     }
 }

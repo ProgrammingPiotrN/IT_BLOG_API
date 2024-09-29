@@ -8,6 +8,7 @@ use App\Domain\Models\Post;
 use App\Domain\Models\User;
 use App\Domain\ValueObjects\Post\Comment;
 use App\Domain\ValueObjects\Post\Content;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface PostServiceInterface
 {
@@ -18,4 +19,6 @@ interface PostServiceInterface
     public function comment(Post $post, User $user, CommentDTO $commentDTO): void;
 
     public function delete(Post $post): void;
+    public function getPaginatedPosts(int $page, int $limit): LengthAwarePaginator;
+
 }
