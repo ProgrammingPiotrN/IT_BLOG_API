@@ -73,7 +73,7 @@ class UserController extends Controller
             return response()->json(['message' => 'User not found'], 404);
         }
 
-        Gate::authorize('view', [$user]);
+        Gate::authorize('view', $user);
 
         return response()->json(new UserResource($user), 200);
     }

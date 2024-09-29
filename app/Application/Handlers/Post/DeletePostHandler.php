@@ -2,6 +2,7 @@
 
 namespace App\Application\Handlers\Post;
 
+use App\Application\Commands\Post\DeletePostCommand;
 use App\Domain\Interfaces\Post\PostServiceInterface;
 
 class DeletePostHandler
@@ -14,5 +15,10 @@ class DeletePostHandler
     public function __construct(PostServiceInterface $postServiceInterface)
     {
         $this->postServiceInterface = $postServiceInterface;
+    }
+
+    public function handle(DeletePostCommand $command)
+    {
+        $this->postServiceInterface->delete($command->post);
     }
 }

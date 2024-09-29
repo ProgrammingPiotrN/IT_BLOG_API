@@ -14,14 +14,14 @@ class Post extends Model
 {
     use HasApiTokens, HasFactory;
 
-    private Title $title;
-    private Content $content;
-    private User $author;
-    private array $likes = [];
-    private array $comments = [];
+    protected  Title $title;
+    protected  Content $content;
+    protected  User $author;
+    protected  array $likes = [];
+    protected array $comments = [];
 
-    private DateTime $createdAt;
-    private DateTime $updatedAt;
+    protected DateTime $createdAt;
+    protected DateTime $updatedAt;
 
     public function __construct(Title $title, Content $content, User $author,
         DateTime $createdAt, DateTime $updatedAt)
@@ -61,8 +61,23 @@ class Post extends Model
         return $this->likes;
     }
 
+    public function getAuthor(): User
+    {
+        return $this->author;
+    }
+
     public function getComments(): array
     {
         return $this->comments;
+    }
+
+    public function getCreatedAt(): DateTime
+    {
+        return $this->createdAt;
+    }
+
+    public function getUpdatedAt(): DateTime
+    {
+        return $this->updatedAt;
     }
 }

@@ -2,15 +2,17 @@
 
 namespace App\Application\Commands\Post;
 
+use App\Domain\Models\Post;
+
 class DeletePostCommand
 {
     /**
      * Create a new class instance.
      */
-    public int $postId;
+    public Post $post;
 
-    public function __construct(int $postId)
+    public function __construct(Post $post)
     {
-        $this->postId = $postId;
+        $this->post = $post;
     }
 }

@@ -28,58 +28,38 @@ class PostService implements PostServiceInterface
         $this->postRepositoryInterface = $postRepositoryInterface;
     }
 
-    public function create(PostDTO $postDTO): void
+    public function create(User $user, PostDTO $postDTO): Post
     {
+        if (!$user->isModerator()) {
+            throw new \Exception('Unauthorized action: You must be a moderator to create a post.');
+        }
+
         $post = new Post(
             new Title($postDTO->title),
             new Content($postDTO->content),
-            $postDTO->author,
-            new DateTime($postDTO->createdAt),
-            new DateTime($postDTO->updatedAt)
+            $user,
+            new DateTime(),
+            new DateTime()
         );
+
         $this->postRepositoryInterface->save($post);
+        return $post;
     }
 
-    public function like(int $postId): void
+    public function like(Post $post, User $user): void
     {
-        $authUser = Auth::user();
-        if (!$authUser instanceof User) {
-            $user = new User(
-                $authUser->name,
-                new Email($authUser->email),
-                new Password($authUser->password)
-            );
-        }
-
-        $post = $this->postRepositoryInterface->findById($postId);
         $post->addLike($user);
         $this->postRepositoryInterface->save($post);
     }
 
-    public function comment(int $postId, CommentDTO $commentDTO): void
-{
-    $authUser = Auth::user();
-
-    if (!$authUser) {
-        throw new \Exception('User must be logged in to comment on a post.');
+    public function comment(Post $post, User $user, CommentDTO $commentDTO): void
+    {
+        $post->addComment($user, new Comment($commentDTO->comment));
+        $this->postRepositoryInterface->save($post);
     }
 
-    $user = new User(
-        $authUser->name,
-        new Email($authUser->email),
-        new Password($authUser->password)
-    );
-
-    $post = $this->postRepositoryInterface->findById($postId);
-
-    $post->addComment($user, new Comment($commentDTO->comment));
-
-    $this->postRepositoryInterface->save($post);
-}
-
-    public function delete(int $postId): void
+    public function delete(Post $post): void
     {
-        $post = $this->postRepositoryInterface->findById($postId);
         $this->postRepositoryInterface->delete($post);
     }
 }

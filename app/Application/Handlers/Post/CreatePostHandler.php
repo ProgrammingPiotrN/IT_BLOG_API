@@ -4,6 +4,8 @@ namespace App\Application\Handlers\Post;
 
 use App\Application\Commands\Post\CreatePostCommand;
 use App\Domain\Interfaces\Post\PostServiceInterface;
+use App\Domain\Models\Post;
+use App\Domain\Models\User;
 
 class CreatePostHandler
 {
@@ -17,8 +19,8 @@ class CreatePostHandler
         $this->postServiceInterface = $postServiceInterface;
     }
 
-    public function handle(CreatePostCommand $command)
+    public function handle(CreatePostCommand $command, User $user): Post
     {
-        $this->postServiceInterface->create($command->postDTO);
+        return $this->postServiceInterface->create($user, $command->postDTO);
     }
 }

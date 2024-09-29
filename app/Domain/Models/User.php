@@ -2,33 +2,47 @@
 
 namespace App\Domain\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-
-use App\Application\DTOs\UserDTO;
-use App\Domain\Exceptions\CannotCreateUserException;
-use App\Domain\Exceptions\UserCreationException;
-use App\Domain\Exceptions\UserNotFoundException;
 use App\Domain\ValueObjects\Email;
 use App\Domain\ValueObjects\Password;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\DB;
 use Laravel\Passport\HasApiTokens;
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    private string $name;
-    private Email $email;
-    private Password $password;
+    const ROLE_MODERATOR = 'moderator';
+    const ROLE_GUEST = 'guest';
 
-    public function __construct(string $name, Email $email, Password $password)
+    protected  string $name;
+    protected  Email $email;
+    protected  Password $password;
+
+    public function __construct(string $name, Email $email, Password $password, array $attributes = [])
     {
+        parent::__construct($attributes);
+        $this->role = $attributes['role'] ?? self::ROLE_GUEST;
+
         $this->name = $name;
         $this->email = $email;
         $this->password = $password;
+    }
+
+    public function isModerator(): bool
+    {
+        return $this->role === self::ROLE_MODERATOR;
+    }
+
+    public function isGuest(): bool
+    {
+        return $this->role === self::ROLE_GUEST;
+    }
+
+    public function author()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function getName(): string {

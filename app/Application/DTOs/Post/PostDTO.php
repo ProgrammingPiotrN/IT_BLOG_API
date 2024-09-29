@@ -16,12 +16,37 @@ class PostDTO
     public string $createdAt;
     public string $updatedAt;
     public function __construct(string $title, string $content, User $author,
-    string $createAt, string $updatedAt)
+    string $createdAt, string $updatedAt)
     {
         $this->title = $title;
         $this->content = $content;
         $this->author = $author;
-        $this->createdAt = $createAt;
+        $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
+    }
+
+    public function getTitle(): string
+    {
+        return $this->title;
+    }
+
+    public function getCreatedAt(): string
+    {
+        return $this->createdAt;
+    }
+
+    public function getUpdatedAt(): string
+    {
+        return $this->updatedAt;
+    }
+
+    public function getAuthor(): User
+    {
+        return $this->author;
+    }
+
+    public function getContent(): string
+    {
+        return $this->content;
     }
 }
